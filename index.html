@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Инвест-старт</title>
+<meta name="description" content="Учебная игра для начинающих инвесторов: проживите 20 лет на рынке, переживите кризисы и сравните себя с ленивым инвестором.">
+<meta property="og:title" content="Инвест-старт: 20 лет инвестиций за 5 минут">
+<meta property="og:description" content="Бесплатная игра для новичков: вклады, облигации, индексные фонды, кризисы и инфляция.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#ff3d7f">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='44' fill='%23ffc234' stroke='%2324163a' stroke-width='8'/><text x='50' y='68' font-size='52' text-anchor='middle' font-family='Arial' font-weight='900' fill='%2324163a'>₽</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+  :root {
+    --bg: #fff8dc; --card: #ffffff; --ink: #24163a; --dim: #7a6a8c; --line: #efe3c4;
+    --pink: #ff3d7f; --pink-soft: #ffe1ec; --sun: #ffc234; --sun-soft: #fff0bf;
+    --green: #12b56a; --green-soft: #d9f7e6; --orange: #ff7a1a; --orange-soft: #ffe6d3;
+    --good: #0e9f5c; --bad: #e5244f; --warn: #e08a00;
+    --c-deposit: #f2b01e; --c-bonds: #12b56a; --c-index: #ff7a1a; --c-stock: #b53bd6;
+    --c-lazy: #12b56a; --c-mattress: #c2b394;
+    --shadow: #24163a;
+    --display: "Unbounded", "Arial Black", system-ui, sans-serif;
+    --body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #1d1428; --card: #2a1e3a; --ink: #fff3e4; --dim: #c2b0d2; --line: #3e2f52;
+      --pink: #ff5c95; --pink-soft: #4a2340; --sun: #ffcd4d; --sun-soft: #43352a;
+      --green: #2fd488; --green-soft: #1f3a33; --orange: #ff8f3d; --orange-soft: #45302a;
+      --good: #3ee08f; --bad: #ff6682; --warn: #ffb640;
+      --c-deposit: #ffcd4d; --c-bonds: #2fd488; --c-index: #ff8f3d; --c-stock: #d56cf2;
+      --c-lazy: #2fd488; --c-mattress: #75668a;
+      --shadow: #0d0814;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #1d1428; --card: #2a1e3a; --ink: #fff3e4; --dim: #c2b0d2; --line: #3e2f52;
+    --pink: #ff5c95; --pink-soft: #4a2340; --sun: #ffcd4d; --sun-soft: #43352a;
+    --green: #2fd488; --green-soft: #1f3a33; --orange: #ff8f3d; --orange-soft: #45302a;
+    --good: #3ee08f; --bad: #ff6682; --warn: #ffb640;
+    --c-deposit: #ffcd4d; --c-bonds: #2fd488; --c-index: #ff8f3d; --c-stock: #d56cf2;
+    --c-lazy: #2fd488; --c-mattress: #75668a;
+    --shadow: #0d0814;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 500 15px/1.5 var(--body); }
+  .wrap { max-width: 1100px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 48px; }
+  h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+  h1 { font-size: 26px; font-weight: 800; }
+  h2 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+  h3 { font-size: 18px; font-weight: 600; }
+  .muted { color: var(--dim); }
+  .small { font-size: 13px; }
+  .num { font-variant-numeric: tabular-nums; }
+  .hidden { display: none !important; }
+
+  .card { background: var(--card); border: 2px solid var(--ink); border-radius: 18px; padding: 18px; box-shadow: 4px 4px 0 var(--shadow); }
+  .grid { display: grid; grid-template-columns: 370px 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 840px) { .grid { grid-template-columns: 1fr; } }
+  .stack { display: grid; gap: 20px; min-width: 0; }
+  .grid > * { min-width: 0; }
+
+  .logo { display: inline-flex; align-items: center; gap: 10px; }
+  .logo .coin { width: 34px; height: 34px; border-radius: 50%; background: var(--sun); border: 2px solid var(--ink);
+                display: grid; place-items: center; font: 800 16px var(--display); color: #24163a; }
+  .logo span.hl { color: var(--pink); }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  .year-chip { font: 600 13px var(--display); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 99px; }
+
+  button { font: inherit; cursor: pointer; border-radius: 12px; border: 2px solid var(--ink); background: var(--card); color: var(--ink); padding: 8px 12px; font-weight: 700; }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--pink); outline-offset: 2px; }
+  .primary { width: 100%; background: var(--pink); color: #fff; font: 800 16px var(--display); padding: 16px; border-radius: 16px;
+             box-shadow: 4px 4px 0 var(--shadow); transition: transform .08s, box-shadow .08s; letter-spacing: .01em; }
+  .primary:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--shadow); }
+  .primary:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--shadow); }
+
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat { border-radius: 14px; padding: 10px 12px; border: 2px solid var(--ink); }
+  .stat span { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ink); opacity: .7; }
+  .stat b { display: block; font: 800 18px var(--body); font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .stat.s1 { background: var(--pink-soft); } .stat.s2 { background: var(--sun-soft); }
+  .stat.s3 { background: var(--green-soft); } .stat.s4 { background: var(--orange-soft); }
+  .progress { height: 14px; background: var(--bg); border: 2px solid var(--ink); border-radius: 99px; overflow: hidden; margin-top: 14px; }
+  .progress div { height: 100%; background: repeating-linear-gradient(-45deg, var(--sun) 0 10px, var(--orange) 10px 20px); transition: width .4s; }
+
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .presets button { font-size: 13px; padding: 6px 10px; border-radius: 99px; }
+  .presets button:hover { background: var(--sun); color: #24163a; }
+  .asset { padding: 10px 0; border-top: 2px dashed var(--line); }
+  .asset:first-child { border-top: 0; }
+  .asset-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .asset-name { font-weight: 800; }
+  .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; border: 2px solid var(--ink); vertical-align: -1px; }
+  .pct { font: 800 16px var(--display); font-variant-numeric: tabular-nums; min-width: 52px; text-align: right; }
+  .risk { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; margin-left: 6px; white-space: nowrap; }
+  .risk.r0 { background: var(--sun-soft); } .risk.r1 { background: var(--green-soft); }
+  .risk.r2 { background: var(--orange-soft); } .risk.r3 { background: var(--pink-soft); }
+  .info { border: 0; background: none; padding: 0 4px; color: var(--dim); font-size: 15px; box-shadow: none; }
+  .desc { font-size: 13px; color: var(--dim); margin: 6px 0 0; display: none; }
+  .desc.open { display: block; }
+  input[type=range] { width: 100%; margin: 8px 0 0; accent-color: var(--pink); }
+  .bar { display: flex; height: 18px; border-radius: 99px; overflow: hidden; background: var(--line); margin: 12px 0 6px; border: 2px solid var(--ink); }
+  .bar div { transition: width .25s; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; font-weight: 700; color: var(--dim); margin-top: 8px; }
+  .legend i { display: inline-block; width: 18px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+  .chart-box { overflow-x: auto; }
+  svg text { fill: var(--dim); font: 600 11px var(--body); }
+
+  .news { position: relative; }
+  .news .tag { display: inline-block; font: 600 11px var(--display); text-transform: uppercase; letter-spacing: .06em; padding: 4px 10px; border-radius: 99px; background: var(--sun); color: #24163a; margin-bottom: 8px; }
+  .news.good .tag { background: var(--green); color: #fff; }
+  .news.bad .tag { background: var(--bad); color: #fff; }
+  .news.warn .tag { background: var(--orange); color: #fff; }
+  .news.pop { animation: pop .35s ease-out; }
+  .news.shake { animation: shake .45s ease-in-out; }
+  @keyframes pop { 0% { transform: scale(.96); } 60% { transform: scale(1.015); } 100% { transform: none; } }
+  @keyframes shake { 0%,100% { transform: none; } 20% { transform: translateX(-8px) rotate(-.6deg); } 40% { transform: translateX(7px) rotate(.5deg); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-variant-numeric: tabular-nums; }
+  td { padding: 6px 0; border-top: 2px dashed var(--line); }
+  td:last-child { text-align: right; font-weight: 800; }
+  .pos { color: var(--good); } .neg { color: var(--bad); }
+  .lesson { background: var(--sun-soft); border: 2px solid var(--ink); border-radius: 12px; padding: 10px 12px; font-size: 14px; margin-top: 10px; }
+
+  .log { font-size: 13px; max-height: 230px; overflow: auto; }
+  .log div { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; border-top: 2px dashed var(--line); font-weight: 600; }
+  .log div:first-child { border-top: 0; }
+
+  .overlay { position: fixed; inset: 0; background: rgba(20, 10, 30, .6); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 10; }
+  .modal { max-width: 520px; width: 100%; background: var(--card); }
+  .modal h2 { font-size: 22px; color: var(--bad); }
+  .modal .choices { display: grid; gap: 10px; margin-top: 14px; }
+  .modal .choices button { text-align: left; padding: 12px 14px; box-shadow: 3px 3px 0 var(--shadow); transition: transform .08s, background .15s; }
+  .modal .choices button:hover { background: var(--sun-soft); transform: translate(-1px, -1px); }
+  .modal .choices b { display: block; font-size: 15px; }
+  .modal .choices span { font-weight: 500; }
+
+  .intro { max-width: 660px; margin: 32px auto; }
+  .hero-title { font: 800 clamp(30px, 7vw, 46px)/1.05 var(--display); margin: 14px 0 10px; }
+  .hero-title em { font-style: normal; color: var(--pink); }
+  .rules { display: grid; gap: 10px; margin: 18px 0 22px; padding: 0; list-style: none; }
+  .rules li { display: flex; gap: 12px; align-items: flex-start; }
+  .rules li i { flex: none; width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--ink); display: grid; place-items: center; font: 800 13px var(--display); font-style: normal; color: #24163a; }
+  .rules li:nth-child(1) i { background: var(--sun); } .rules li:nth-child(2) i { background: var(--green); }
+  .rules li:nth-child(3) i { background: var(--orange); } .rules li:nth-child(4) i { background: var(--pink); }
+  .disclaimer { font-size: 12px; color: var(--dim); margin-top: 14px; }
+  .final-big { font: 800 clamp(32px, 8vw, 48px) var(--display); font-variant-numeric: tabular-nums; color: var(--pink); margin: 6px 0; }
+  .lessons { padding-left: 0; list-style: none; display: grid; gap: 10px; }
+  .lessons li { background: var(--bg); border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+
+  .coin-fx { position: fixed; z-index: 20; pointer-events: none; width: 22px; height: 22px; border-radius: 50%;
+             background: var(--sun); border: 2px solid #24163a; font: 800 11px var(--display); color: #24163a;
+             display: grid; place-items: center; animation: fly 1s cubic-bezier(.2,.7,.4,1) forwards; }
+  @keyframes fly { to { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) {
+    .news.pop, .news.shake, .coin-fx { animation: none; }
+    .coin-fx { display: none; }
+    .primary, .bar div, .progress div { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- Intro -->
+  <section id="intro" class="card intro">
+    <div class="logo"><div class="coin">₽</div><strong>Инвест<span class="hl">-старт</span></strong></div>
+    <div class="hero-title">20 лет инвестиций <em>за 5 минут</em></div>
+    <p class="muted" style="margin:0">Игра для новичков: проживите два десятилетия на рынке и посмотрите, как на самом деле ведут себя деньги.</p>
+    <ul class="rules">
+      <li><i>1</i><span>На старте у вас <b>100 000 ₽</b>, и каждый год вы откладываете ещё <b>60 000 ₽</b>.</span></li>
+      <li><i>2</i><span>Перед каждым годом решите, как разложить деньги: вклад, облигации, индексный фонд или одна рискованная акция.</span></li>
+      <li><i>3</i><span>Потом наступает год: бывают спокойные годы, бумы, кризисы и инфляция.</span></li>
+      <li><i>4</i><span>Вы соревнуетесь с <b>ленивым инвестором</b> (всегда 60% индекс, 40% облигации) и с деньгами <b>под матрасом</b>.</span></li>
+    </ul>
+    <button class="primary" id="startBtn">Начать игру</button>
+    <p class="disclaimer">Это учебная симуляция со случайными событиями. Доходности условные и упрощённые, это не инвестиционная рекомендация.</p>
+  </section>
+
+  <!-- Game -->
+  <section id="game" class="hidden">
+    <header>
+      <div class="logo"><div class="coin">₽</div><h1>Инвест<span style="color:var(--pink)">-старт</span></h1></div>
+      <div class="year-chip" id="yearLabel"></div>
+    </header>
+    <div class="grid">
+      <div class="stack">
+        <div class="card">
+          <div class="stats">
+            <div class="stat s1"><span>Портфель</span><b id="sValue"></b></div>
+            <div class="stat s2"><span>Вложено своих</span><b id="sInvested"></b></div>
+            <div class="stat s3"><span>Прибыль</span><b id="sProfit"></b></div>
+            <div class="stat s4"><span>В ценах 1-го года</span><b id="sReal"></b></div>
+          </div>
+          <div class="progress" aria-label="Прогресс игры"><div id="progress"></div></div>
+        </div>
+
+        <div class="card">
+          <h2>Как разложить деньги в этом году?</h2>
+          <div class="presets">
+            <button data-preset="0">🐢 Осторожно</button>
+            <button data-preset="1">⚖️ Баланс</button>
+            <button data-preset="2">🦁 Смело</button>
+            <button data-preset="3">🎰 Всё в ракету</button>
+          </div>
+          <div id="assets"></div>
+          <div class="bar" id="allocBar"></div>
+          <p class="small muted" style="margin:0">В начале года портфель перераспределяется по этим долям.</p>
+        </div>
+
+        <button class="primary" id="nextBtn">Прожить год →</button>
+      </div>
+
+      <div class="stack">
+        <div class="card">
+          <h2>Как растут деньги</h2>
+          <div class="chart-box" id="chart"></div>
+          <div class="legend">
+            <span><i style="background:var(--pink)"></i>Вы</span>
+            <span><i style="background:var(--c-lazy)"></i>Ленивый инвестор 60/40</span>
+            <span><i style="background:var(--c-mattress)"></i>Под матрасом</span>
+          </div>
+        </div>
+        <div class="card news" id="news"></div>
+        <div class="card">
+          <h2>Хроника</h2>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final -->
+  <section id="final" class="card intro hidden"></section>
+</div>
+
+<!-- Panic modal -->
+<div class="overlay hidden" id="panic">
+  <div class="card modal">
+    <h2>😱 Рынок рухнул!</h2>
+    <p id="panicText"></p>
+    <p class="muted small">Друзья советуют спасать, что осталось. В новостях пишут, что дальше будет только хуже. Что делаете?</p>
+    <div class="choices">
+      <button data-panic="sell"><b>Продать всё рискованное</b><span class="muted small">Переложить акции и индекс во вклад и переждать</span></button>
+      <button data-panic="hold"><b>Держать курс</b><span class="muted small">Ничего не менять, план есть план</span></button>
+      <button data-panic="buy"><b>Докупить на просадке</b><span class="muted small">Увеличить долю индексного фонда, пока всё дёшево</span></button>
+    </div>
+  </div>
+</div>
+
+<script>
+const START = 100000, YEARLY = 60000, YEARS = 20;
+
+const ASSETS = [
+  { id: 'deposit', name: 'Вклад', emoji: '🏦', risk: 'без риска', color: 'var(--c-deposit)',
+    desc: 'Банк платит фиксированный процент. Денег не потерять, но ставка обычно лишь чуть выше инфляции, а иногда и ниже.' },
+  { id: 'bonds', name: 'Облигации', emoji: '📜', risk: 'низкий риск', color: 'var(--c-bonds)',
+    desc: 'Вы даёте в долг государству или компании, а они платят купоны. Доход стабильнее, чем у акций, но при резком росте ставок облигации дешевеют.' },
+  { id: 'index', name: 'Индексный фонд', emoji: '🌐', risk: 'средний риск', color: 'var(--c-index)',
+    desc: 'Одна покупка, и у вас кусочек сотен компаний. Бывают плохие годы, но на длинной дистанции такой фонд обычно обгоняет облигации. Это и есть диверсификация.' },
+  { id: 'stock', name: 'Акция «ТехноРакета»', emoji: '🚀', risk: 'высокий риск', color: 'var(--c-stock)',
+    desc: 'Акция одной компании. Может вырасти в разы, а может обвалиться из-за одного скандала. Весь риск завязан на одну историю.' },
+];
+const PRESETS = [
+  { deposit: 60, bonds: 30, index: 10, stock: 0 },
+  { deposit: 10, bonds: 40, index: 50, stock: 0 },
+  { deposit: 0,  bonds: 15, index: 70, stock: 15 },
+  { deposit: 0,  bonds: 0,  index: 0,  stock: 100 },
+];
+
+// Each event receives "base" returns and adjusts them.
+const EVENTS = [
+  { id: 'calm', w: 5, tone: '', tag: 'Спокойно', title: '☕ Спокойный год',
+    text: 'Ничего особенного: экономика понемногу растёт, новости скучные.',
+    lesson: 'Большинство лет на рынке скучные, и это нормально. Богатеют не от драмы, а от времени и регулярных пополнений.',
+    apply: r => r },
+  { id: 'boom', w: 2, tone: 'good', tag: 'Рост', title: '🚀 Бычий рынок',
+    text: 'Компании отчитываются о рекордной прибыли, все вокруг обсуждают акции.',
+    lesson: 'В такие годы хочется переложить всё в то, что выросло сильнее всего. Но прошлая доходность не гарантирует будущую.',
+    apply: r => ({ ...r, index: r.index + 0.14, stock: r.stock + 0.3 }) },
+  { id: 'crash', w: 1.4, tone: 'bad', tag: 'Кризис', title: '📉 Финансовый кризис',
+    text: 'Банки в панике, рынок акций резко падает. Заголовки кричат о конце эпохи.',
+    lesson: 'Кризисы случаются примерно раз в 7–10 лет. Исторически широкий рынок после них восстанавливался, а продавшие на дне фиксировали убыток навсегда.',
+    apply: r => ({ ...r, index: -0.26 - Math.random() * 0.12, stock: -0.45 - Math.random() * 0.2, bonds: r.bonds + 0.03 }) },
+  { id: 'inflation', w: 1.2, tone: 'warn', tag: 'Инфляция', title: '🔥 Всплеск инфляции',
+    text: 'Цены в магазинах резко растут, центробанк поднимает ставку.',
+    lesson: 'Инфляция тихо съедает деньги, и под матрасом они дешевеют. Высокие ставки помогают вкладам, но бьют по облигациям и акциям.',
+    apply: r => ({ ...r, inflation: 0.11 + Math.random() * 0.04, deposit: 0.13, bonds: -0.05 - Math.random() * 0.04, index: r.index - 0.06, stock: r.stock - 0.1 }) },
+  { id: 'scandal', w: 0.8, tone: 'bad', tag: 'Скандал', title: '💥 Скандал в «ТехноРакете»',
+    text: 'Выяснилось, что компания приукрашивала отчётность. Руководство ушло в отставку.',
+    lesson: 'Одна компания может упасть на 70% за день, при этом весь рынок живёт как обычно. Поэтому не стоит класть все яйца в одну корзину.',
+    apply: r => ({ ...r, stock: -0.7 - Math.random() * 0.15 }) },
+  { id: 'rocket', w: 0.8, tone: 'good', tag: 'Джекпот', title: '🌕 «ТехноРакета» взлетела',
+    text: 'Новый продукт компании стал хитом, акции выросли в разы.',
+    lesson: 'Иногда одной акции везёт. Но угадать такую заранее почти невозможно: на одну взлетевшую приходится много упавших.',
+    apply: r => ({ ...r, stock: 0.9 + Math.random() * 0.6 }) },
+];
+const RECOVERY = { id: 'recovery', tone: 'good', tag: 'Восстановление', title: '🌱 Рынок отыгрывает падение',
+  text: 'Паника утихла, компании снова зарабатывают, котировки растут.',
+  lesson: 'Самые сильные дни роста часто идут сразу после самых страшных. Кто продал в кризис, обычно пропускает и восстановление.',
+  apply: r => ({ ...r, index: r.index + 0.2, stock: r.stock + 0.3 }) };
+
+const fmt = n => Math.round(n).toLocaleString('ru-RU') + ' ₽';
+const pct = x => (x >= 0 ? '+' : '') + (x * 100).toFixed(1) + '%';
+const gauss = () => { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+const $ = id => document.getElementById(id);
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let G; // game state
+
+function newGame() {
+  G = {
+    year: 0, value: START, lazy: START, mattress: START, invested: START, cpi: 1,
+    weights: { ...PRESETS[1] },
+    history: [{ year: 0, you: START, lazy: START, mattress: START, invested: START }],
+    lastEvent: null, panicChoice: null, maxStock: 0, depositYears: 0,
+  };
+}
+
+function pickEvent() {
+  if (G.lastEvent === 'crash' && Math.random() < 0.65) return RECOVERY;
+  const total = EVENTS.reduce((s, e) => s + e.w, 0);
+  let x = Math.random() * total;
+  for (const e of EVENTS) { if ((x -= e.w) < 0) return e; }
+  return EVENTS[0];
+}
+
+function yearReturns(ev) {
+  const inflation = Math.max(0.02, 0.05 + gauss() * 0.012);
+  const index = 0.09 + gauss() * 0.1;
+  const base = {
+    inflation,
+    deposit: inflation + 0.01,
+    bonds: 0.07 + gauss() * 0.03,
+    index,
+    stock: index * 1.5 + gauss() * 0.22,
+  };
+  const r = ev.apply(base);
+  r.stock = Math.max(-0.92, r.stock);
+  r.index = Math.max(-0.5, r.index);
+  return r;
+}
+
+function normWeights() {
+  const w = G.weights, sum = ASSETS.reduce((s, a) => s + w[a.id], 0);
+  if (!sum) return { deposit: 1, bonds: 0, index: 0, stock: 0 };
+  return Object.fromEntries(ASSETS.map(a => [a.id, w[a.id] / sum]));
+}
+
+function liveYear() {
+  const w = normWeights();
+  const ev = pickEvent();
+  const r = yearReturns(ev);
+  const before = G.value;
+
+  const yourR = ASSETS.reduce((s, a) => s + w[a.id] * r[a.id], 0);
+  const lazyR = 0.6 * r.index + 0.4 * r.bonds;
+  G.value *= 1 + yourR;
+  G.lazy *= 1 + lazyR;
+  G.cpi *= 1 + r.inflation;
+  G.year++;
+  G.maxStock = Math.max(G.maxStock, w.stock);
+  if (w.deposit >= 0.7) G.depositYears++;
+  G.lastEvent = ev.id;
+  const gain = G.value - before;
+
+  // Record year-end numbers before next year's contribution lands.
+  G.history.push({ year: G.year, you: G.value, lazy: G.lazy, mattress: G.mattress, invested: G.invested });
+  if (G.year < YEARS) {
+    G.value += YEARLY; G.lazy += YEARLY; G.mattress += YEARLY; G.invested += YEARLY;
+  }
+
+  showNews(ev, r, yourR, gain);
+  addLog(ev, yourR);
+  render(true);
+  if (yourR > 0.08) coinBurst(Math.min(18, 6 + Math.round(yourR * 40)));
+
+  if (G.year >= YEARS) { $('nextBtn').textContent = 'Посмотреть итоги 🏁'; return; }
+  if (ev.id === 'crash' && w.index + w.stock > 0.05 && !G.panicChoice) openPanic(yourR, r.index);
+}
+
+function newsIdle() {
+  const el = $('news');
+  el.className = 'card news';
+  el.innerHTML = `<span class="tag">Год 1</span><h3>Год ещё не начался</h3>
+    <p class="muted" style="margin:6px 0 0">Выберите, как разложить деньги, и нажмите «Прожить год». Нажмите ⓘ рядом с активом, чтобы узнать, что это такое.</p>`;
+}
+
+function showNews(ev, r, yourR, gain) {
+  const el = $('news');
+  const rows = ASSETS.map(a =>
+    `<tr><td><span class="dot" style="background:${a.color}"></span>${a.emoji} ${a.name}</td><td class="${r[a.id] >= 0 ? 'pos' : 'neg'}">${pct(r[a.id])}</td></tr>`).join('');
+  el.innerHTML = `
+    <span class="tag">Год ${G.year} · ${ev.tag}</span>
+    <h3>${ev.title}</h3>
+    <p style="margin:6px 0 0">${ev.text}</p>
+    <table>${rows}
+      <tr><td>🛒 Инфляция (рост цен)</td><td class="neg">${pct(r.inflation)}</td></tr>
+      <tr><td><b>Ваш портфель</b></td><td class="${yourR >= 0 ? 'pos' : 'neg'}">${pct(yourR)} (${gain >= 0 ? '+' : ''}${fmt(gain)})</td></tr>
+    </table>
+    <div class="lesson">💡 ${ev.lesson}</div>`;
+  el.className = 'card news ' + ev.tone;
+  void el.offsetWidth; // restart animation
+  el.classList.add(yourR < -0.05 ? 'shake' : 'pop');
+}
+
+function addLog(ev, yourR) {
+  const log = $('log');
+  if (G.year === 1) log.innerHTML = '';
+  const row = document.createElement('div');
+  row.innerHTML = `<span>Год ${G.year}: ${ev.title}</span><span class="num ${yourR >= 0 ? 'pos' : 'neg'}">${pct(yourR)}</span>`;
+  log.prepend(row);
+}
+
+function coinBurst(n) {
+  if (reduceMotion) return;
+  const b = $('nextBtn').getBoundingClientRect();
+  for (let i = 0; i < n; i++) {
+    const c = document.createElement('div');
+    c.className = 'coin-fx'; c.textContent = '₽';
+    c.style.left = (b.left + b.width / 2 - 11) + 'px';
+    c.style.top = (b.top + 10) + 'px';
+    c.style.setProperty('--dx', (Math.random() - 0.5) * 320 + 'px');
+    c.style.setProperty('--dy', -(80 + Math.random() * 220) + 'px');
+    c.style.setProperty('--rot', (Math.random() - 0.5) * 720 + 'deg');
+    c.style.animationDelay = Math.random() * 0.15 + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 1300);
+  }
+}
+
+function countUp(el, to, signed = false) {
+  const from = +(el.dataset.v || to);
+  el.dataset.v = to;
+  const show = v => el.textContent = (signed && v >= 0 ? '+' : '') + fmt(v);
+  if (reduceMotion || from === to) { show(to); return; }
+  const t0 = performance.now(), dur = 600;
+  const step = now => {
+    const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+    show(from + (to - from) * e);
+    if (k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+function openPanic(yourR, indexR) {
+  $('panicText').innerHTML = `Ваш портфель за год изменился на <b class="neg">${pct(yourR)}</b>. Индексный фонд упал на <b class="neg">${pct(indexR)}</b>.`;
+  $('panic').classList.remove('hidden');
+}
+document.querySelectorAll('[data-panic]').forEach(b => b.addEventListener('click', () => {
+  const c = b.dataset.panic;
+  G.panicChoice = c;
+  const w = G.weights;
+  if (c === 'sell') { w.deposit += w.index + w.stock; w.index = 0; w.stock = 0; }
+  if (c === 'buy') {
+    const fromDeposit = Math.round(w.deposit / 2), fromBonds = Math.round(w.bonds / 3);
+    w.deposit -= fromDeposit; w.bonds -= fromBonds; w.index += fromDeposit + fromBonds;
+  }
+  $('panic').classList.add('hidden');
+  buildSliders();
+}));
+
+function buildSliders() {
+  $('assets').innerHTML = ASSETS.map((a, i) => `
+    <div class="asset">
+      <div class="asset-head">
+        <div><span class="dot" style="background:${a.color}"></span><span class="asset-name">${a.emoji} ${a.name}</span><span class="risk r${i}">${a.risk}</span><button class="info" data-info="${a.id}" aria-label="Что такое ${a.name}?">ⓘ</button></div>
+        <div class="pct" id="p-${a.id}"></div>
+      </div>
+      <p class="desc" id="d-${a.id}">${a.desc}</p>
+      <input type="range" id="w-${a.id}" min="0" max="100" step="5" value="${G.weights[a.id]}" data-asset="${a.id}" aria-label="${a.name}">
+    </div>`).join('');
+  document.querySelectorAll('[data-asset]').forEach(s => s.addEventListener('input', () => {
+    G.weights[s.dataset.asset] = +s.value; renderAlloc();
+  }));
+  document.querySelectorAll('[data-info]').forEach(b => b.addEventListener('click', () =>
+    $('d-' + b.dataset.info).classList.toggle('open')));
+  renderAlloc();
+}
+
+function renderAlloc() {
+  const w = normWeights();
+  ASSETS.forEach(a => { $('p-' + a.id).textContent = Math.round(w[a.id] * 100) + '%'; });
+  $('allocBar').innerHTML = ASSETS.map(a => `<div style="width:${w[a.id] * 100}%;background:${a.color}"></div>`).join('');
+}
+
+function render() {
+  $('yearLabel').textContent = G.year >= YEARS ? 'Финиш!' : `Год ${G.year + 1} из ${YEARS}`;
+  countUp($('sValue'), G.value);
+  countUp($('sInvested'), G.invested);
+  const profit = G.value - G.invested;
+  countUp($('sProfit'), profit, true);
+  $('sProfit').className = profit >= 0 ? 'pos' : 'neg';
+  countUp($('sReal'), G.value / G.cpi);
+  $('progress').style.width = (G.year / YEARS * 100) + '%';
+  drawChart();
+}
+
+function drawChart() {
+  const W = 640, H = 260, L = 64, Rp = 12, T = 12, B = 26;
+  const h = G.history;
+  const max = Math.max(...h.map(p => Math.max(p.you, p.lazy, p.mattress))) * 1.08;
+  const x = i => L + (i / YEARS) * (W - L - Rp);
+  const y = v => T + (1 - v / max) * (H - T - B);
+  const pts = key => h.map(p => `${x(p.year)},${y(p[key])}`).join(' ');
+  const line = (key, color, width, dash = '') =>
+    `<polyline fill="none" stroke="${color}" stroke-width="${width}" stroke-linejoin="round" stroke-linecap="round" ${dash ? `stroke-dasharray="${dash}"` : ''} points="${pts(key)}"/>`;
+  let grid = '';
+  for (let i = 0; i <= 4; i++) {
+    const v = max * i / 4;
+    grid += `<line x1="${L}" x2="${W - Rp}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1.5"/>` +
+            `<text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${v >= 1e6 ? (v / 1e6).toFixed(1) + ' млн' : Math.round(v / 1000) + ' тыс'}</text>`;
+  }
+  for (let yr = 0; yr <= YEARS; yr += 5) grid += `<text x="${x(yr)}" y="${H - 6}" text-anchor="middle">${yr === 0 ? 'старт' : yr + ' год'}</text>`;
+  const last = h.at(-1);
+  const area = `<polygon fill="var(--pink)" fill-opacity="0.12" points="${x(0)},${y(0)} ${pts('you')} ${x(last.year)},${y(0)}"/>`;
+  $('chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:320px" role="img" aria-label="График стоимости портфеля">
+    ${grid}
+    ${area}
+    ${line('mattress', 'var(--c-mattress)', 2.5, '6 6')}
+    ${line('lazy', 'var(--c-lazy)', 3)}
+    ${line('you', 'var(--pink)', 4)}
+    <circle cx="${x(last.year)}" cy="${y(last.you)}" r="7" fill="var(--pink)" stroke="var(--ink)" stroke-width="2"/>
+  </svg>`;
+}
+
+function showFinal() {
+  $('game').classList.add('hidden');
+  const f = $('final'); f.classList.remove('hidden');
+  const { you, lazy, mattress } = G.history.at(-1);
+  const invested = G.invested, growth = you - invested;
+  const lessons = [];
+
+  lessons.push(growth > 0
+    ? `🧮 <b>Сложный процент.</b> Из ${fmt(you)} вы вложили ${fmt(invested)}, а <b>${fmt(growth)}</b> заработали сами деньги. Доход приносит доход, и эффект сильнее всего на длинной дистанции.`
+    : `🧮 <b>Сложный процент работает и в обратную сторону.</b> Портфель оказался меньше вложенного: потери тоже накапливаются, если слишком рисковать.`);
+  lessons.push(`🛒 <b>Инфляция.</b> Цены за 20 лет выросли в ${G.cpi.toFixed(1)} раза. Деньги под матрасом (${fmt(mattress)}) сегодня купят столько же, сколько ${fmt(mattress / G.cpi)} в первый год.`);
+  if (G.panicChoice === 'sell') lessons.push(`😱 <b>Продажа в панике.</b> Вы продали рискованные активы после кризиса. Обычно это самая дорогая ошибка новичка: убыток фиксируется, а восстановление проходит мимо.`);
+  if (G.panicChoice === 'hold') lessons.push(`🧘 <b>Выдержка.</b> В кризис вы не стали продавать. Держаться плана, когда страшно, — главный навык инвестора.`);
+  if (G.panicChoice === 'buy') lessons.push(`🛍️ <b>Покупки на просадке.</b> Вы докупили, когда всё подешевело. Если есть план и запас денег, это разумная тактика.`);
+  if (G.maxStock >= 0.5) lessons.push(`🎰 <b>Концентрация.</b> В какой-то год больше половины денег лежало в одной акции. Иногда это выстреливает, но одна плохая новость может обнулить годы накоплений.`);
+  if (G.depositYears >= 12) lessons.push(`🐢 <b>Чрезмерная осторожность.</b> Больше половины игры деньги в основном лежали на вкладе. Риска почти нет, но и рост едва обгоняет инфляцию.`);
+  lessons.push(you >= lazy
+    ? `🏆 Вы обогнали ленивого инвестора на ${fmt(you - lazy)}. Отлично! Проверьте, не повезло ли: сыграйте ещё раз с той же стратегией.`
+    : `🦥 Ленивый инвестор со стратегией «60/40, ничего не трогать» обогнал вас на ${fmt(lazy - you)}. Простая дисциплинированная стратегия часто выигрывает у активной.`);
+
+  f.innerHTML = `
+    <div class="logo"><div class="coin">₽</div><strong>Инвест<span class="hl">-старт</span></strong></div>
+    <div class="hero-title">20 лет <em>позади!</em></div>
+    <p class="muted" style="margin:0">Итоговая стоимость портфеля</p>
+    <div class="final-big">${fmt(you)}</div>
+    <p class="muted" style="margin:0">в ценах первого года: ${fmt(you / G.cpi)}</p>
+    <div class="stats" style="margin:18px 0">
+      <div class="stat s2"><span>Вложено своих</span><b>${fmt(invested)}</b></div>
+      <div class="stat s3"><span>Ленивый 60/40</span><b>${fmt(lazy)}</b></div>
+      <div class="stat s4"><span>Под матрасом</span><b>${fmt(mattress)}</b></div>
+      <div class="stat s1"><span>Рост цен за 20 лет</span><b>×${G.cpi.toFixed(2)}</b></div>
+    </div>
+    <h2>Чему научила эта игра</h2>
+    <ul class="lessons">${lessons.map(l => `<li>${l}</li>`).join('')}</ul>
+    <button class="primary" id="againBtn" style="margin-top:8px">Сыграть ещё раз</button>
+    <p class="disclaimer">Каждая игра случайна: сыграйте несколько раз разными стратегиями и посмотрите, какая стабильнее. Это учебная модель, а не прогноз и не рекомендация.</p>`;
+  $('againBtn').addEventListener('click', start);
+  if (you >= lazy) coinBurst(24);
+  window.scrollTo(0, 0);
+}
+
+function start() {
+  newGame();
+  $('intro').classList.add('hidden'); $('final').classList.add('hidden'); $('game').classList.remove('hidden');
+  $('nextBtn').textContent = 'Прожить год →';
+  ['sValue', 'sInvested', 'sProfit', 'sReal'].forEach(id => delete $(id).dataset.v);
+  newsIdle();
+  $('log').innerHTML = '<p class="muted small" style="margin:0">Здесь появится история ваших лет.</p>';
+  buildSliders(); render();
+  window.scrollTo(0, 0);
+}
+
+document.querySelectorAll('[data-preset]').forEach(b => b.addEventListener('click', () => {
+  G.weights = { ...PRESETS[+b.dataset.preset] }; buildSliders();
+}));
+$('startBtn').addEventListener('click', start);
+$('nextBtn').addEventListener('click', () => { if (G.year >= YEARS) showFinal(); else liveYear(); });
+</script>
+</body>
+</html>
