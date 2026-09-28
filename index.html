@@ -9,6 +9,7 @@
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#ff3d7f">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='44' fill='%23ffc234' stroke='%2324163a' stroke-width='8'/><text x='50' y='68' font-size='52' text-anchor='middle' font-family='Arial' font-weight='900' fill='%2324163a'>₽</text></svg>">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -154,6 +155,22 @@
   .lessons { padding-left: 0; list-style: none; display: grid; gap: 10px; }
   .lessons li { background: var(--bg); border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; }
 
+  .yr { margin-top: 10px; font-weight: 700; font-size: 14px; text-align: center; min-height: 21px; }
+  .badge { display: inline-flex; align-items: center; gap: 10px; background: var(--sun); color: #24163a; border: 2px solid var(--ink);
+           border-radius: 16px; padding: 10px 16px; box-shadow: 3px 3px 0 var(--shadow); font: 800 18px var(--display); margin: 14px 0 4px; }
+  .badge-sub { font-size: 14px; color: var(--dim); margin: 6px 0 0; }
+  .share { background: var(--pink-soft); border: 2px solid var(--ink); border-radius: 16px; padding: 14px; margin: 18px 0; }
+  .share h3 { font-size: 16px; margin-bottom: 6px; }
+  .share .btns { display: grid; gap: 8px; margin-top: 10px; }
+  .share .btns a, .cta a { display: block; text-align: center; text-decoration: none; font: 800 15px var(--display); padding: 13px; border-radius: 14px;
+           border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--shadow); }
+  .tg { background: #2aa3e0; color: #fff; }
+  .alt { background: var(--card); color: var(--ink); }
+  .cta { border: 2px solid var(--ink); border-radius: 16px; padding: 14px; margin: 18px 0 6px; background: var(--green-soft); }
+  .cta h3 { font-size: 16px; }
+  .cta a { background: var(--green); color: #fff; margin-top: 10px; }
+  .by { font-size: 13px; color: var(--dim); margin: 12px 0 0; }
+  .by a { color: var(--pink); font-weight: 700; }
   .coin-fx { position: fixed; z-index: 20; pointer-events: none; width: 22px; height: 22px; border-radius: 50%;
              background: var(--sun); border: 2px solid #24163a; font: 800 11px var(--display); color: #24163a;
              display: grid; place-items: center; animation: fly 1s cubic-bezier(.2,.7,.4,1) forwards; }
@@ -181,6 +198,7 @@
       <li><i>4</i><span>Вы соревнуетесь с <b>ленивым инвестором</b> (всегда 60% индекс, 40% облигации) и с деньгами <b>под матрасом</b>.</span></li>
     </ul>
     <button class="primary" id="startBtn">Начать игру</button>
+    <p class="by">Игру сделал <a href="https://t.me/YunusovArtur" target="_blank" rel="noopener">Артур Юнусов</a> — пишу простым языком про деньги и инвестиции.</p>
     <p class="disclaimer">Это учебная симуляция со случайными событиями. Доходности условные и упрощённые, это не инвестиционная рекомендация.</p>
   </section>
 
@@ -216,6 +234,7 @@
         </div>
 
         <button class="primary" id="nextBtn">Прожить год →</button>
+        <div class="yr" id="yearResult"></div>
       </div>
 
       <div class="stack">
@@ -378,6 +397,7 @@ function liveYear() {
   }
 
   showNews(ev, r, yourR, gain);
+  $('yearResult').innerHTML = `Год ${G.year}: ${ev.title} · <span class="${yourR >= 0 ? 'pos' : 'neg'}">${pct(yourR)}</span>`;
   addLog(ev, yourR);
   render(true);
   if (yourR > 0.08) coinBurst(Math.min(18, 6 + Math.round(yourR * 40)));
@@ -551,23 +571,56 @@ function showFinal() {
     ? `🏆 Вы обогнали ленивого инвестора на ${fmt(you - lazy)}. Отлично! Проверьте, не повезло ли: сыграйте ещё раз с той же стратегией.`
     : `🦥 Ленивый инвестор со стратегией «60/40, ничего не трогать» обогнал вас на ${fmt(lazy - you)}. Простая дисциплинированная стратегия часто выигрывает у активной.`);
 
+  const beat = you >= lazy;
+  let badge, bsub;
+  if (G.panicChoice === 'sell') { badge = '😱 Паникёр'; bsub = 'Продал на дне кризиса. Самая частая и самая дорогая ошибка новичков.'; }
+  else if (G.maxStock >= 0.5 && beat) { badge = '🍀 Везунчик'; bsub = 'Поставил на одну акцию, и повезло. В жизни так везёт редко.'; }
+  else if (G.maxStock >= 0.5) { badge = '🎰 Лудоман'; bsub = 'Всё в одну акцию. Рынок напомнил, почему так не делают.'; }
+  else if (G.depositYears >= 12) { badge = '🐢 Хранитель вклада'; bsub = 'Надёжно, но инфляция откусила почти весь рост.'; }
+  else if (beat && G.panicChoice === 'buy') { badge = '🦈 Охотник за просадками'; bsub = 'Докупил, когда все паниковали, и обогнал ленивого инвестора.'; }
+  else if (beat) { badge = '🧊 Хладнокровный инвестор'; bsub = 'Держал план и обогнал ленивого инвестора.'; }
+  else { badge = '🦥 Проиграл ленивому'; bsub = 'Стратегия «60/40 и ничего не трогать» оказалась сильнее.'; }
+  const botLink = 'https://t.me/YunusovArtur_bot?start=game_share';
+  const shareText = `Мой результат в «Инвест-старт»: ${fmt(you)} за 20 лет, звание «${badge.replace(/^\S+\s/, '')}». Сможешь больше? 😏`;
+  const tgShare = 'https://t.me/share/url?url=' + encodeURIComponent(botLink) + '&text=' + encodeURIComponent(shareText);
   f.innerHTML = `
     <div class="logo"><div class="coin">₽</div><strong>Инвест<span class="hl">-старт</span></strong></div>
     <div class="hero-title">20 лет <em>позади!</em></div>
     <p class="muted" style="margin:0">Итоговая стоимость портфеля</p>
     <div class="final-big">${fmt(you)}</div>
     <p class="muted" style="margin:0">в ценах первого года: ${fmt(you / G.cpi)}</p>
+    <div class="badge">${badge}</div>
+    <p class="badge-sub">${bsub}</p>
     <div class="stats" style="margin:18px 0">
       <div class="stat s2"><span>Вложено своих</span><b>${fmt(invested)}</b></div>
       <div class="stat s3"><span>Ленивый 60/40</span><b>${fmt(lazy)}</b></div>
       <div class="stat s4"><span>Под матрасом</span><b>${fmt(mattress)}</b></div>
       <div class="stat s1"><span>Рост цен за 20 лет</span><b>×${G.cpi.toFixed(2)}</b></div>
     </div>
+    <div class="share">
+      <h3>🔥 Брось вызов другу</h3>
+      <p class="small" style="margin:0">Отправь игру другу и сравните, у кого капитал через 20 лет больше. Проигравший угощает кофе ☕</p>
+      <div class="btns">
+        <a class="tg" href="${tgShare}" target="_blank" rel="noopener">Отправить в Telegram</a>
+        <a class="alt" href="#" id="shareBtn">Поделиться результатом</a>
+      </div>
+    </div>
     <h2>Чему научила эта игра</h2>
     <ul class="lessons">${lessons.map(l => `<li>${l}</li>`).join('')}</ul>
     <button class="primary" id="againBtn" style="margin-top:8px">Сыграть ещё раз</button>
+    <div class="cta">
+      <h3>А как инвестирует автор игры?</h3>
+      <p class="small" style="margin:6px 0 0">В канале я простым языком разбираю рынок и новости, которые бьют по кошельку, и показываю, как инвестирую сам.</p>
+      <a href="https://t.me/YunusovArtur" target="_blank" rel="noopener">Смотреть канал Артура</a>
+    </div>
     <p class="disclaimer">Каждая игра случайна: сыграйте несколько раз разными стратегиями и посмотрите, какая стабильнее. Это учебная модель, а не прогноз и не рекомендация.</p>`;
   $('againBtn').addEventListener('click', start);
+  $('shareBtn').addEventListener('click', async e => {
+    e.preventDefault();
+    const full = shareText + ' ' + botLink;
+    try { if (navigator.share) { await navigator.share({ text: shareText, url: botLink }); return; } } catch (err) { if (err && err.name === 'AbortError') return; }
+    try { await navigator.clipboard.writeText(full); e.target.textContent = 'Скопировано ✅'; } catch (err) { window.open(tgShare, '_blank'); }
+  });
   if (you >= lazy) coinBurst(24);
   window.scrollTo(0, 0);
 }
@@ -576,6 +629,7 @@ function start() {
   newGame();
   $('intro').classList.add('hidden'); $('final').classList.add('hidden'); $('game').classList.remove('hidden');
   $('nextBtn').textContent = 'Прожить год →';
+  $('yearResult').innerHTML = '';
   ['sValue', 'sInvested', 'sProfit', 'sReal'].forEach(id => delete $(id).dataset.v);
   newsIdle();
   $('log').innerHTML = '<p class="muted small" style="margin:0">Здесь появится история ваших лет.</p>';
